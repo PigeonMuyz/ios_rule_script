@@ -1,4 +1,4 @@
-# Surge / Loon 精选补充规则
+# Surge / Loon / Mihomo 精选补充规则
 
 这些文件仅包含公开域名，不包含机场订阅、证书、API 密钥、设备或家庭网络设置。
 
@@ -24,5 +24,7 @@ PCC、Emby 的策略和 CN DIRECT 优先级由各客户端主配置维护。
     node personal-rules/refresh.mjs --publish
 
 主配置使用 personal-rules/Surge/*.list 和 personal-rules/Loon/*.list 的稳定 raw 地址。
+Mihomo 使用 personal-rules/Mihomo/*.list，provider 配置为 behavior: classical、format: text。
+三个客户端的域名规则正文一致；仅文件头不同。
 刷新脚本每次重新解析目录和 manifest，不依赖旧产物的摘要文件名。
 当前没有设置自动定时发布；来源或筛选逻辑变化后应先检查生成结果。

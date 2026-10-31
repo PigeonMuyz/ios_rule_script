@@ -129,7 +129,13 @@ for (const client of ['Surge','Loon']) {
       'hdslb.net','b23.tv','acg.tv'].map(d=>'DOMAIN-SUFFIX,'+d),
     'Mainland Bilibili services; excludes Bilibili international services.');
 }
+// The reviewed domain-only rules also use Mihomo's classical/text syntax.
+for (const [path,content] of Object.entries(archive)) {
+  if(path.startsWith(PREFIX+'/Surge/') && path.endsWith('.list'))
+    archive[path.replace('/Surge/','/Mihomo/')]=content.replace('# NAME: Surge/','# NAME: Mihomo/');
+}
 archive[PREFIX+'/provenance.json']=JSON.stringify({version:1,
+  derivedClients:{Mihomo:'Reviewed Surge DOMAIN/DOMAIN-SUFFIX bodies in classical/text format'},
   policy:'Exact/suffix domains only. No shared root, process, ASN, keyword, or IP rules for curated AI.',
   sources:provenance,excluded:[...new Set(exclusions.map(e=>e.line))].sort()},null,2)+'\n';
 const summary=Object.entries(archive).filter(([p])=>p.endsWith('.list'))
