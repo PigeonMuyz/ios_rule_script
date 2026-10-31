@@ -1,0 +1,23 @@
+# NAME: Loon/AITools
+# OWNER: PigeonMuyz/ios_rule_script
+# Cursor + Perplexity + GitHub/Microsoft Copilot; excludes shared cloud/login/payment roots.
+# Public domains only; CN routing remains DIRECT in the client profiles.
+
+DOMAIN,copilot-proxy.githubusercontent.com
+DOMAIN,copilot-telemetry-service.githubusercontent.com
+DOMAIN,copilot-telemetry.githubusercontent.com
+DOMAIN,copilot-workspace.githubnext.com
+DOMAIN,copilotprodattachments.blob.core.windows.net
+DOMAIN,ppl-ai-file-upload.s3.amazonaws.com
+DOMAIN,pplx-res.cloudinary.com
+DOMAIN-SUFFIX,copilot.microsoft.com
+DOMAIN-SUFFIX,cursor-cdn.com
+DOMAIN-SUFFIX,cursor.com
+DOMAIN-SUFFIX,cursor.sh
+DOMAIN-SUFFIX,cursorapi.com
+DOMAIN-SUFFIX,cursorvm.com
+DOMAIN-SUFFIX,githubcopilot.com
+DOMAIN-SUFFIX,githubcopilot.net
+DOMAIN-SUFFIX,perplexity.ai
+DOMAIN-SUFFIX,perplexity.com
+DOMAIN-SUFFIX,pplx.ai
