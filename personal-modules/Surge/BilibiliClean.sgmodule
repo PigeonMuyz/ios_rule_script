@@ -1,0 +1,24 @@
+#!name=咕咕 · B站精简与开屏修复
+#!desc=补齐首页频道、底部首页/动态/我的、我的页面精简及开屏拦截。界面与开屏使用Surge原生JQ/Map Local，不依赖kelee.one。不会修改会员状态或视频CDN选路。请关闭其他B站去广告模块后启用，并冷启动B站。
+#!category=咕咕 iOS
+#!requirement=CORE_VERSION>=6008000
+# 2026-11-01：针对本次 Loon -> Surge 迁移漏项修复。
+# 参考：可莉 Bilibili_remove_ads.lpx / QingRex LoonKissSurge 的UI规则。
+# 二进制播放页/动态处理保留 app2smile 原作者 Surge 脚本。
+# 来源 https://github.com/app2smile/rules；不承诺完整还原旧插件所有功能。
+
+[MITM]
+hostname = %APPEND% app.bilibili.com, grpc.biliapi.net
+h2 = true
+auto-quic-block = true
+
+[Map Local]
+^https:\/\/app\.bilibili\.com\/x\/v2\/splash\/(?:list|show|event\/list2)(?:\?|$) data-type=base64 data="eyJjb2RlIjowLCJtZXNzYWdlIjoiT0siLCJ0dGwiOjEsImRhdGEiOnsibWF4X3RpbWUiOjAsIm1pbl9pbnRlcnZhbCI6MzE1MzYwMDAsInB1bGxfaW50ZXJ2YWwiOjMxNTM2MDAwLCJrZWVwX2lkcyI6W10sInNob3ciOltdLCJldmVudF9saXN0IjpbXSwibGlzdCI6W3t9XSwic3BsYXNoX3JlcXVlc3RfaWQiOiIifX0=" status-code=200 header="Content-Type:application/json"
+
+[Body Rewrite]
+http-response-jq ^https://app\.bilibili\.com/x/resource/show/tab/v2(?:\?|$) 'def positions: to_entries | map(.value + {pos:(.key+1)}); def keep_or_original($old): if length>0 then positions else $old end; if (.data|type)=="object" then .data |= (if (.bottom|type)=="array" then .bottom |= (. as $old | map(select((.id==177 or .id==179 or .id==181) or ((.name//"")|IN("首页","动态","关注","我的")) or ((.uri//"")|test("^bilibili://(main/home/?|following/home/?|user_center/?)$")))) | keep_or_original($old)) else . end | if (.tab|type)=="array" then .tab |= (. as $old | map(select((.id|IN(477,478,545,151,731)) or ((.name//"")|IN("推荐","精选","热门","动画","番剧","影视","直播")))) | keep_or_original($old)) else . end | if (.top|type)=="array" then .top |= map(select(((.name//"")|IN("游戏中心","会员购","直播"))|not)) | .top |= positions else . end) else . end'
+http-response-jq ^https://app\.bilibili\.com/x/v2/account/mine(?:/ipad)?(?:\?|$) 'def useful: ((.id|tostring)|IN("396","397","3072","2830","407","410","747","748","749","750","755","756","763","764")) or ((.uri//"")|test("^bilibili://(user_center/(download|history|favourite|favorite|watch_later(_v2)?|myfollows|setting|feedback)|link/im_home)([/?#]|$)")) or ((.title//"")|IN("离线缓存","历史记录","我的收藏","稍后再看","联系客服","设置")); if (.data|type)=="object" then .data |= (del(.answer,.live_tip,.vip_section,.vip_section_v2,.modular_vip_section) | if (.sections_v2|type)=="array" then .sections_v2 |= map(if (.items|type)=="array" then .items |= map(select(useful)) else . end | select((.items|type)!="array" or (.items|length)>0)) else . end | reduce ["ipad_sections","ipad_upper_sections","ipad_recommend_sections","ipad_more_sections"][] as $k (.; if (.[$k]|type)=="array" then .[$k] |= map(select(useful)) else . end)) else . end'
+http-response-jq ^https://app\.bilibili\.com/x/v2/feed/index(?:/story)?(?:\?|$) 'def is_ad: (.ad_info!=null) or (.banner_item!=null) or ((.card_goto//"")|test("^(ad_|cm$|vertical_ad_)")) or ((.card_type//"")|test("^(cm_|ad_|banner_)")); if (.data.items|type)=="array" then .data.items |= map(select(is_ad|not) | del(.story_cart_icon,.free_flow_toast)) else . end'
+
+[Script]
+bili-clean-proto = type=http-response, pattern=^https://(grpc\.biliapi\.net|app\.bilibili\.com)/bilibili\.app\.(viewunite\.v1\.View/View|dynamic\.v2\.Dynamic/DynAll)$, requires-body=1, binary-body-mode=1, max-size=0, script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js, script-update-interval=86400
